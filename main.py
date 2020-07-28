@@ -20,7 +20,7 @@ def getCurrentComic(response: Response):
         comicData = functions.loadJSON('https://xkcd.com/info.0.json')
     except urllib.error.HTTPError as error:
         response.status_code = error.code
-        return {"detail": error.msg}
+        return error
     return functions.processComicData(comicData)
 
 
@@ -35,7 +35,7 @@ def getManyComics(response: Response, comic_ids: List[int] = Query(...)):
             comicData = functions.loadJSON(f'https://xkcd.com/{comicId}/info.0.json')
         except urllib.error.HTTPError as error:
             response.status_code = error.code
-            return {"detail": error.msg}
+            return error
         output.append(functions.processComicData(comicData))
         history.append(comicId)
     return output
@@ -43,8 +43,8 @@ def getManyComics(response: Response, comic_ids: List[int] = Query(...)):
 
 @app.get("/comics/download")
 def downloadComics(response: Response, comic_ids: List[int] = Query(...)):
-    
     history = []
+    urls = []
     imagesPath = os.getenv('IMAGES_PATH')
     localFiles = list(map(
         lambda filename: int(filename.split('.')[0]),
@@ -58,11 +58,12 @@ def downloadComics(response: Response, comic_ids: List[int] = Query(...)):
             comicData = functions.loadJSON(f'https://xkcd.com/{comicId}/info.0.json')
         except urllib.error.HTTPError as error:
             response.status_code = error.code
-            return {"detail": error.msg}
-
-        imageUrl = comicData['img']
-        functions.saveImage(imagesPath, str(comicId), imageUrl)
+            return error
+        urls.append((comicId,comicData['img']))
         history.append(comicId)
+    
+    for comicId, imageUrl in urls:
+        functions.saveImage(imagesPath, str(comicId), imageUrl)
 
 
 @app.get("/comics/{comicId}")
@@ -71,5 +72,5 @@ def getComicByID(comicId: int, response: Response):
         comicData = functions.loadJSON(f'https://xkcd.com/{comicId}/info.0.json')
     except urllib.error.HTTPError as error:
         response.status_code = error.code
-        return {"detail": error.msg}
+        return error
     return functions.processComicData(comicData)
