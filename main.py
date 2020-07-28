@@ -61,7 +61,7 @@ def downloadComics(response: Response, comic_ids: List[int] = Query(...)):
             return {"detail": error.msg}
 
         imageUrl = comicData['img']
-        functions.saveImage(imagesPath, comicId, imageUrl)
+        functions.saveImage(imagesPath, str(comicId), imageUrl)
         history.append(comicId)
 
 
