@@ -64,6 +64,7 @@ def downloadComics(response: Response, comic_ids: List[int] = Query(...)):
     
     for comicId, imageUrl in urls:
         functions.saveImage(imagesPath, str(comicId), imageUrl)
+    return {}
 
 
 @app.get("/comics/{comicId}")
