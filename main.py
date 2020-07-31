@@ -15,63 +15,63 @@ app = FastAPI()
 
 
 @app.get("/comics/current")
-def getCurrentComic(response: Response):
+def get_current_comic(response: Response):
     try:
-        comicData = functions.loadJSON('https://xkcd.com/info.0.json')
+        comic_data = functions.load_json('https://xkcd.com/info.0.json')
     except urllib.error.HTTPError as error:
         response.status_code = error.code
         return error
-    return functions.processComicData(comicData)
+    return functions.process_comic_data(comic_data)
 
 
 @app.get("/comics/many")
-def getManyComics(response: Response, comic_ids: List[int] = Query(...)):
+def get_many_comics(response: Response, comic_ids: List[int] = Query(...)):
     output = []
     history = []
-    for comicId in comic_ids:
-        if comicId in history:
+    for comic_id in comic_ids:
+        if comic_id in history:
             continue
         try:
-            comicData = functions.loadJSON(f'https://xkcd.com/{comicId}/info.0.json')
+            comic_data = functions.load_json(f'https://xkcd.com/{comic_id}/info.0.json')
         except urllib.error.HTTPError as error:
             response.status_code = error.code
             return error
-        output.append(functions.processComicData(comicData))
-        history.append(comicId)
+        output.append(functions.process_comic_data(comic_data))
+        history.append(comic_id)
     return output
 
 
 @app.get("/comics/download")
-def downloadComics(response: Response, comic_ids: List[int] = Query(...)):
+def download_comics(response: Response, comic_ids: List[int] = Query(...)):
     history = []
     urls = []
-    imagesPath = os.getenv('IMAGES_PATH')
-    localFiles = list(map(
+    images_path = os.getenv('IMAGES_PATH')
+    local_files = list(map(
         lambda filename: int(filename.split('.')[0]),
-        functions.getFilenames(imagesPath)
+        functions.get_filenames(images_path)
     ))
     
-    for comicId in comic_ids:
-        if comicId in history or comicId in localFiles:
+    for comic_id in comic_ids:
+        if comic_id in history or comic_id in local_files:
             continue
         try:
-            comicData = functions.loadJSON(f'https://xkcd.com/{comicId}/info.0.json')
+            comic_data = functions.load_json(f'https://xkcd.com/{comic_id}/info.0.json')
         except urllib.error.HTTPError as error:
             response.status_code = error.code
             return error
-        urls.append((comicId,comicData['img']))
-        history.append(comicId)
+        urls.append((comic_id,comic_data['img']))
+        history.append(comic_id)
     
-    for comicId, imageUrl in urls:
-        functions.saveImage(imagesPath, str(comicId), imageUrl)
+    for comic_id, image_url in urls:
+        functions.save_image(images_path, str(comic_id), image_url)
     return {}
 
 
-@app.get("/comics/{comicId}")
-def getComicByID(comicId: int, response: Response):
+@app.get("/comics/{comic_id}")
+def get_comic_by_id(comic_id: int, response: Response):
     try:
-        comicData = functions.loadJSON(f'https://xkcd.com/{comicId}/info.0.json')
+        comic_data = functions.load_json(f'https://xkcd.com/{comic_id}/info.0.json')
     except urllib.error.HTTPError as error:
         response.status_code = error.code
         return error
-    return functions.processComicData(comicData)
+    return functions.process_comic_data(comic_data)

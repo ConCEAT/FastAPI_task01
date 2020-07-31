@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Dict
 
 
-def getFilenames(path: str) -> list:
+def get_filenames(path: str) -> list:
     "Get names of all files in the given directory"
     for (_, _, filenames) in os.walk(path):
         if filenames:
@@ -15,30 +15,30 @@ def getFilenames(path: str) -> list:
         return []
     raise ValueError("Incorrect path given")
 
-def saveImage(path: str, filename: str, url: str) -> None:
+def save_image(path: str, filename: str, url: str) -> None:
     """Save image from URL to /path/filename.ext
     
     File extension is taken from URL
     """
-    fileExtension = url.split('.')[-1]
+    file_extension = url.split('.')[-1]
     image = requests.get(url).content
-    with open(f'{path}{filename}.{fileExtension}', 'wb') as newImage:
-        newImage.write(image)
+    with open(os.path.join(path,f'{filename}.{file_extension}'), 'wb') as new_image:
+        new_image.write(image)
     
-def loadJSON(url: str) -> dict:
+def load_json(url: str) -> dict:
     "Load JSON file from URL to python dictionary"
     with urllib.request.urlopen(url) as source:
         text = source.read().decode('utf8')
     return json.loads(text)
 
-def processComicData(comicData: Dict) -> dict:
+def process_comic_data(comic_data: Dict) -> dict:
     return {
-        "id" : comicData["num"],
-        "description" : comicData["transcript"],
+        "id" : comic_data["num"],
+        "description" : comic_data["transcript"],
         "date" : datetime(
-            int(comicData["year"]),
-            int(comicData["month"]),
-            int(comicData["day"])).strftime("%y-%m-%d"),
-        "title" : comicData["title"].lower(),
-        "url" : comicData["img"]
+            int(comic_data["year"]),
+            int(comic_data["month"]),
+            int(comic_data["day"])).strftime("%y-%m-%d"),
+        "title" : comic_data["title"].lower(),
+        "url" : comic_data["img"]
     }
