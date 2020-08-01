@@ -13,11 +13,13 @@ import functions
 load_dotenv()
 app = FastAPI()
 
+HOST = os.getenv('HOST')
+
 
 @app.get("/comics/current")
 def get_current_comic(response: Response):
     try:
-        comic_data = functions.load_json('https://xkcd.com/info.0.json')
+        comic_data = functions.load_json(f'{HOST}/info.0.json')
     except urllib.error.HTTPError as error:
         response.status_code = error.code
         return error
@@ -32,7 +34,7 @@ def get_many_comics(response: Response, comic_ids: List[int] = Query(...)):
         if comic_id in history:
             continue
         try:
-            comic_data = functions.load_json(f'https://xkcd.com/{comic_id}/info.0.json')
+            comic_data = functions.load_json(f'{HOST}/{comic_id}/info.0.json')
         except urllib.error.HTTPError as error:
             response.status_code = error.code
             return error
@@ -55,7 +57,7 @@ def download_comics(response: Response, comic_ids: List[int] = Query(...)):
         if comic_id in history or comic_id in local_files:
             continue
         try:
-            comic_data = functions.load_json(f'https://xkcd.com/{comic_id}/info.0.json')
+            comic_data = functions.load_json(f'{HOST}/{comic_id}/info.0.json')
         except urllib.error.HTTPError as error:
             response.status_code = error.code
             return error
@@ -70,7 +72,7 @@ def download_comics(response: Response, comic_ids: List[int] = Query(...)):
 @app.get("/comics/{comic_id}")
 def get_comic_by_id(comic_id: int, response: Response):
     try:
-        comic_data = functions.load_json(f'https://xkcd.com/{comic_id}/info.0.json')
+        comic_data = functions.load_json(f'{HOST}/{comic_id}/info.0.json')
     except urllib.error.HTTPError as error:
         response.status_code = error.code
         return error
