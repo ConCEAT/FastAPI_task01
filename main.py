@@ -1,12 +1,9 @@
 import os
-import json
-import requests
 import urllib.request
-from datetime import datetime
+from typing import List
 
 from dotenv import load_dotenv
-from typing import Optional, Dict, List
-from fastapi import FastAPI, Response, Query
+from fastapi import FastAPI, Query, Response
 
 from logic import Comic
 
@@ -53,8 +50,8 @@ def download_comics(response: Response, comic_ids: List[int] = Query(...)):
         except urllib.error.HTTPError as error:
             response.status_code = error.code
             return error
-        urls.append((comic_id,comic_data.get('img')))
-    
+        urls.append((comic_id, comic_data.get('img')))
+
     for comic_id, image_url in urls:
         Comic.save_image(images_path, str(comic_id), image_url)
     return {}
