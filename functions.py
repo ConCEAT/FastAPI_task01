@@ -11,7 +11,7 @@ def get_filenames(path: str) -> list:
     "Get names of all files in the given directory"
     for (_, _, filenames) in os.walk(path):
         if filenames:
-            return filenames
+            return list(map(lambda filename: int(filename.split('.')[0]), filenames))
         return []
     raise ValueError("Incorrect path given")
 

@@ -29,40 +29,31 @@ def get_current_comic(response: Response):
 @app.get("/comics/many")
 def get_many_comics(response: Response, comic_ids: List[int] = Query(...)):
     output = []
-    history = []
-    for comic_id in comic_ids:
-        if comic_id in history:
-            continue
+    unique_ids = list(dict.fromkeys(comic_ids))
+    for comic_id in unique_ids:
         try:
             comic_data = functions.load_json(f'{HOST}/{comic_id}/info.0.json')
         except urllib.error.HTTPError as error:
             response.status_code = error.code
             return error
         output.append(functions.process_comic_data(comic_data))
-        history.append(comic_id)
     return output
 
 
 @app.get("/comics/download")
 def download_comics(response: Response, comic_ids: List[int] = Query(...)):
-    history = []
     urls = []
     images_path = os.getenv('IMAGES_PATH')
-    local_files = list(map(
-        lambda filename: int(filename.split('.')[0]),
-        functions.get_filenames(images_path)
-    ))
-    
-    for comic_id in comic_ids:
-        if comic_id in history or comic_id in local_files:
-            continue
+    local_files = dict.fromkeys(functions.get_filenames(images_path), True)
+    unique_ids = [ID for ID in dict.fromkeys(comic_ids) if not local_files.get(ID)]
+
+    for comic_id in unique_ids:
         try:
             comic_data = functions.load_json(f'{HOST}/{comic_id}/info.0.json')
         except urllib.error.HTTPError as error:
             response.status_code = error.code
             return error
         urls.append((comic_id,comic_data['img']))
-        history.append(comic_id)
     
     for comic_id, image_url in urls:
         functions.save_image(images_path, str(comic_id), image_url)
